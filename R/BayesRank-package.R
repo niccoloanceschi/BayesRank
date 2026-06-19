@@ -10,10 +10,8 @@
 #' the Modeling of Neuron Degeneration in Caenorhabditis
 #' elegans}"](https://arxiv.org/abs/PLACEHOLDER).
 #'
-#' Relative to existing rank-likelihood implementations
-#' such as the \code{R} package [\code{mtlm}](https://github.com/pdhoff/mtlm), \code{BayesRank} 
-#' additionally supports random effects, parameter constraints, collapsed 
-#' sampling, and parameter expansion.
+#' Relative to existing rank-likelihood implementations, it additionally supports
+#' random effects, parameter constraints, collapsed sampling, and parameter expansion.
 #' While the bundled data, design matrices, and tutorial are specific to
 #' the C. elegans assay design described above, the underlying isotonic
 #' rank-likelihood methodology readily generalizes to a broad range of rank-based

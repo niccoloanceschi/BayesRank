@@ -13,7 +13,7 @@ which implements a Bayesian isotonic rank-likelihood model for ordinal regressio
 The model was developed to analyze *Caenorhabditis elegans* neuron damage scores from a developmental rotenone exposure assay from [Bergemann et al. (2026) "*Progeny effects of rotenone exposure depend on parental toxicity*"](https://academic.oup.com/toxsci/article/209/3/kfag011/8475413).
 The package reproduces the analysis from **Section 5** of [Presman, Anceschi, Huayta, Meyer, and Herring, (2026+) "*Order-Restricted Bayesian Ordinal Regression for the Modeling of Neuron Degeneration in Caenorhabditis elegans*"](https://arxiv.org/abs/PLACEHOLDER).
 
-Relative to existing rank-likelihood implementations, such as the `R` package [`mtlm`](https://github.com/pdhoff/mtlm), `BayesRank` additionally supports random effects, parameter constraints, collapsed sampling, and parameter expansion.
+Relative to existing rank-likelihood implementations, `BayesRank` additionally supports random effects, parameter constraints, collapsed sampling, and parameter expansion.
 While the bundled data, design matrices, and tutorial are specific to the *C. elegans* assay design described above, the underlying isotonic rank-likelihood methodology readily generalizes to a broad range of rank-based regression settings.
 
 # Initial Imports
@@ -233,9 +233,6 @@ Bijwadia, S.R., Morton, K., and Meyer, J.N. (2021). "Quantifying Levels of
 Dopaminergic Neuron Morphological Alteration and Degeneration in
 *Caenorhabditis elegans*." *JoVE*, 177:e62894.
 <https://www.jove.com/t/62894/quantifying-levels-dopaminergic-neuron-morphological-alteration>
-
-Hoff, P.D. (2026). `mtlm`: Multivariate transformed linear models.
-<https://github.com/pdhoff/mtlm>
 
 Presman, R., Anceschi, N., Huayta, J., Meyer, J.N., and Herring, A.H. (2026+).
 "Order-Restricted Bayesian Ordinal Regression for the Modeling of Neuron
