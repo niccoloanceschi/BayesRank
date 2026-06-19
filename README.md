@@ -32,7 +32,7 @@ pak::pak("niccoloanceschi/BayesRank")
 
 The main functions are detailed in the package [manual](https://github.com/niccoloanceschi/BayesRank/blob/main/BayesRank_0.1.0.pdf).
 
-A full [tutorial](https://htmlpreview.github.io/?https://raw.githubusercontent.com/niccoloanceschi/BayesRank/main/tutorial/C-elegans_Data_Analysis.html) with detailed workflow is provided in the repository.
+A [tutorial](https://niccoloanceschi.github.io/BayesRank/tutorial/C-elegans_Data_Analysis.html) illustrating the end-to-end analysis workflow is provided in the repository.
 
 ## Example usage 
 
@@ -46,16 +46,14 @@ data <- get_data()
 data_bayes <- get_data_BayesRank(data)
 
 # Fit model
-fit_bayes <- fit_BayesRank(data_bayes$y, data_bayes$X,
-                           data_bayes$W, data_bayes$Q,
+fit_bayes <- fit_BayesRank(data_bayes$y, data_bayes$X, data_bayes$W, data_bayes$Q,
                            iter_MC=10000, iter_Burn=5000)
 
 # Process posterior samples
 draws_mcmc <- postprocess_BayesRank(fit_bayes,data_bayes)
 
 # Generate predictions
-y_pred <- predict_BayesRank(data_bayes$X, data_bayes$W,
-                            data_bayes$Q, draws_mcmc)
+y_pred <- predict_BayesRank(data_bayes$X, data_bayes$W, data_bayes$Q, draws_mcmc)
 ```
 
 ## Structure
