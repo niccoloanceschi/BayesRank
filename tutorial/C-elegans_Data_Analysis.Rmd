@@ -60,8 +60,8 @@ We refer to the main manuscript and to the documentation of the function `set_hy
 
 ```{r}
 n_mcmc  <- 20000
-n_burn  <- 10000 
-mc_seed <- 123
+n_burn  <- 10000
+mc_seed <- 1
 ```
 
 # BAYES-RANK
@@ -86,6 +86,17 @@ In-sample prediction of ordinal damage scores can be then generated to assess go
 
 ```{r}
 y_pred <- predict_BayesRank(data_bayes$X, data_bayes$W, data_bayes$Q, draws_mcmc)
+```
+
+```{r, include=FALSE, message=FALSE, warning=FALSE}
+if(F){
+  main_folder <- here::here()  # repo root, regardless of where it's cloned
+  output_folder <- file.path(main_folder, "tutorial", "results")
+  dir.create(output_folder, recursive = TRUE, showWarnings = FALSE)
+  
+  file_name = paste0('bayes-rank', "__nIter_", n_mcmc, "__nBurn_", n_burn)
+  saveRDS(fit_bayes, file = file.path(output_folder,paste0(file_name,'.rds')))
+}
 ```
 
 # TREND-CUM-LOGIT
