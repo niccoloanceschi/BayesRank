@@ -32,7 +32,7 @@ pak::pak("niccoloanceschi/BayesRank")
 
 The main functions are detailed in the package [manual](https://github.com/niccoloanceschi/BayesRank/blob/main/BayesRank_0.1.0.pdf).
 
-A full [tutorial](https://niccoloanceschi.github.io/BayesRank/tutorial/C-elegans_Data_Analysis.html) with detailed workflow is provided in the repository.
+A [tutorial](https://niccoloanceschi.github.io/BayesRank/tutorial/C-elegans_Data_Analysis.html) illustrating the end-to-end analysis workflow is provided in the repository.
 
 ## Example usage 
 
