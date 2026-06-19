@@ -46,16 +46,14 @@ data <- get_data()
 data_bayes <- get_data_BayesRank(data)
 
 # Fit model
-fit_bayes <- fit_BayesRank(data_bayes$y, data_bayes$X,
-                           data_bayes$W, data_bayes$Q,
+fit_bayes <- fit_BayesRank(data_bayes$y, data_bayes$X, data_bayes$W, data_bayes$Q,
                            iter_MC=10000, iter_Burn=5000)
 
 # Process posterior samples
 draws_mcmc <- postprocess_BayesRank(fit_bayes,data_bayes)
 
 # Generate predictions
-y_pred <- predict_BayesRank(data_bayes$X, data_bayes$W,
-                            data_bayes$Q, draws_mcmc)
+y_pred <- predict_BayesRank(data_bayes$X, data_bayes$W, data_bayes$Q, draws_mcmc)
 ```
 
 ## Structure
