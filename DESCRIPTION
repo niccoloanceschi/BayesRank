@@ -1,0 +1,34 @@
+Package: BayesRank
+Type: Package
+Title: Bayesian rank-based isotonic regression for the analysis of Caenorhabditis elegans toxicological assays
+Version: 0.1.0
+Authors@R: c(
+    person("Niccolo", "Anceschi", email = "niccolo.anceschi@duke.edu", role = c("aut", "cre")),
+    person("Rick", "Presman", email = "rick.presman@duke.edu", role = "ctb"))
+Description: Implements a Bayesian rank-likelihood model for ordinal regression under monotonicity constraints, developed to analyze the Caenorhabditis elegans neurotoxicity assay from Bergemann et al. (2026) 'Progeny effects of rotenone exposure depend on parental toxicity' (Toxicological Sciences). Reproduces the analysis from Presman, Anceschi, Huayta, Meyer, and Herring (2026+) 'Order-Restricted Bayesian Ordinal Regression for the Modeling of Neuron Degeneration in Caenorhabditis elegans' (forthcoming), extending existing rank-likelihood software to support random effects, parameter constraints, collapsed sampling, and parameter expansion. While the package's code is specific to the target assay design, the implemented modeling framework readily generalizes to a much broader range of rank-based isotonic regression settings.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+Depends: 
+    R (>= 3.5)
+Imports:
+    Rcpp,
+    RcppArmadillo,
+    Matrix,
+    MASS,
+    RConics,
+    ordinal,
+    tibble,
+    tidyr,
+    dplyr,
+    ggplot2,
+    tidybayes,
+    ggh4x,
+    patchwork,
+    viridis,
+    scales
+LinkingTo:
+    Rcpp,
+    RcppArmadillo
+Config/roxygen2/version: 8.0.0

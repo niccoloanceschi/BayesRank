@@ -1,0 +1,10 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+src/*.o
+src/*.so
+src/*.dll
+tutorial/results/
+tutorial/C-elegans_Data_Analysis_cache/
+tutorial/C-elegans_Data_Analysis_files/

@@ -1,0 +1,248 @@
+---
+title: "Tutorial for <code>BayesRank</code>"
+author: "Niccolo Anceschi"
+date: "2026-06-12"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+This tutorial provides an introduction to the `R` package `BayesRank`,
+which implements a Bayesian isotonic rank-likelihood model for ordinal regression under monotonicity constraints.
+The model was developed to analyze *Caenorhabditis elegans* neuron damage scores from a developmental rotenone exposure assay from [Bergemann et al. (2026) "*Progeny effects of rotenone exposure depend on parental toxicity*"](https://academic.oup.com/toxsci/article/209/3/kfag011/8475413).
+The package reproduces the analysis from **Section 5** of [Presman, Anceschi, Huayta, Meyer, and Herring, (2026+) "*Order-Restricted Bayesian Ordinal Regression for the Modeling of Neuron Degeneration in Caenorhabditis elegans*"](https://arxiv.org/abs/PLACEHOLDER).
+
+Relative to existing rank-likelihood implementations, such as the `R` package [`mtlm`](https://github.com/pdhoff/mtlm), `BayesRank` additionally supports random effects, parameter constraints, collapsed sampling, and parameter expansion.
+While the bundled data, design matrices, and tutorial are specific to the *C. elegans* assay design described above, the underlying isotonic rank-likelihood methodology readily generalizes to a broad range of rank-based regression settings.
+
+# Initial Imports
+
+We begin by loading `BayesRank` and the `R` package `ordinal`,the only additional package required to run this tutorial.
+
+```{r, message=FALSE, warning=FALSE}
+rm(list = ls())
+library(BayesRank)
+library(ordinal)
+```
+
+# Data Import 
+
+The data consists of 559 worms, each with up to 4 neurons, with 2,099 total neurons observed.
+Damage scores are recorded on each neuron based on the system developed in [Bijwadia et al. (2021) "*Quantifying Levels of Dopaminergic Neuron Morphological Alteration and Degeneration in Caenorhabditis elegans*"](https://www.jove.com/t/62894/quantifying-levels-dopaminergic-neuron-morphological-alteration), with scores ranging from 0 (no damage) to 6 (full loss of neuron morphological integrity).
+Worms belong to either the parental generation ($P0$, 46.7$\%$), developmentally exposed to rotenone at 0 $\mu M$ (control), 0.03 $\mu M$, or 0.5 $\mu M$, or the offspring generation ($F1$, 53.3$\%$), born after a chemical washout and never directly exposed to rotenone during development.
+Specific parent-offspring pairs are not tracked, but are aggregated into generation cohorts.
+Thus, $P0$ and $F1$ groups reflect known exposure histories at the population-level ancestry -- rather than individual lineages -- enabling generation-level inference.
+Approximately half the worms in each generation (42.9 overall) additionally received a late-life rechallenge dose of 25 $\mu M$ rotenone at day 4 of adulthood, to unmask latent neuronal susceptibility.
+Experiments were conducted across three independent replicates (33.3$\%$, 35.2$\%$, and 31.5$\%$ of worms, respectively), which may introduce batch effects due to exogenous experimental factors.
+
+```{r}
+data       <- get_data() # processing raw data
+data_bayes <- get_data_BayesRank(data) # format for BAYES-RANK
+data_clmm  <- get_data_clmm(data) # format for TREND-CUM-LOGIT
+```
+
+The raw neuron-level data bundled with the package are processed to obtain:
+
+- `y`: ordinal neuron damage score vector ($N = 2{,}099$ observations); for numerical convenience, we use values in $\{1,\ldots,7\}$, rather than $\{0,\ldots,6\}$ as in the manuscript
+- `X`: binary design matrix for incremental treatment effects ($N \times 8$), 
+  with columns corresponding to Low/High contrasts crossed with Generation and Rechallenge status
+- `W`: binary design matrix for replicate batch effects ($N \times 3$), sum-to-zero constrained internally
+- `Q`: binary design matrix for worm-level random effects ($N \times 559$) assigning each neuron to its worm
+
+# MCMC Hyperparameters
+
+`BayesRank` requires setting minimal hyper-parameters to run the gibbs sampler, namely total and burn-in MCMC iterations.
+Here we also set the random seed as to reproduce the same exact result form the analysis in 
+the paper.
+Other optional hyper-parameters are set to their default values -- otherwise specified via the input list `hyperparams`.
+We refer to the main manuscript and to the documentation of the function `set_hyperparameters` for further guidance.
+
+```{r}
+n_mcmc  <- 20000
+n_burn  <- 10000 
+mc_seed <- 123
+```
+
+# BAYES-RANK
+
+We fit the proposed model via `fit_BayesRank`.
+By default, the Gibbs sampler uses analytic marginalization of the random effects (after burn-in) 
+and parameter expansion for selected updates.
+Both helps improving posterior mixing, as documented in **Appendix E** of the paper.
+  
+```{r, cache=TRUE}
+fit_bayes <- fit_BayesRank(data_bayes$y, data_bayes$X, data_bayes$W, data_bayes$Q,
+                           iter_MC=n_mcmc, iter_Burn=n_burn, MC_seed=mc_seed)
+```
+
+The samples from the posterior distribution can be then processed to discards burn-in and to derive other quantities of interest from the raw MCMC draws.
+
+```{r}
+draws_mcmc <- postprocess_BayesRank(fit_bayes,data_bayes)
+```
+
+In-sample prediction of ordinal damage scores can be then generated to assess goodness-of-fit performance.
+
+```{r}
+y_pred <- predict_BayesRank(data_bayes$X, data_bayes$W, data_bayes$Q, draws_mcmc)
+```
+
+# TREND-CUM-LOGIT
+
+As a benchmark, we also fit one of the several competitor considered in the paper.
+Specifically, we fit an unconstrained cumulative logit mixed model fit via 
+`ordinal::clmm`, with three-way Treatment × Generation × Rechallenge 
+interaction terms and worm-level random effects. 
+
+As detailed in the paper, we facilitate interpretation of treatment effects
+across and within strata by setting to zero the contribution of the dose-control 
+level within each stratum, rather than imposing a single global null category.
+This amounts to dropping the three-way terms for any zero-dose instance of 
+parental early treatment.
+
+```{r, cache=TRUE}
+fit_clmm <- clmm(factNeuronScore ~ Replicate1 + Replicate2 + Replicate3 +
+                   Treatment003uM.Retreatmentcontrol.GenerationF1 +
+                   Treatment003uM.Retreatmentcontrol.GenerationP0 +
+                   Treatment003uM.Retreatment25uM.GenerationF1 +
+                   Treatment003uM.Retreatment25uM.GenerationP0 +
+                   Treatment050uM.Retreatmentcontrol.GenerationF1 +
+                   Treatment050uM.Retreatmentcontrol.GenerationP0 + 
+                   Treatment050uM.Retreatment25uM.GenerationF1 + 
+                   Treatment050uM.Retreatment25uM.GenerationP0 +
+                   (1 | UniqueWormID),
+                 data = data_clmm)
+```
+
+Once again, in-sample prediction can be then generated to bechmark goodness-of-fit performance.
+
+```{r}
+y_pred_clmm <- predict_clmm(fit_clmm,data_clmm)
+```
+
+# Plots
+
+The package offers different visualization functions, that allow to riproduce the figures from **Section 5** of the main manuscript (and partly from **Appendix E**).
+
+## Cumulative effects
+
+The cumulative treatment effects represent the overall shift on the latent damage scale induced by exposure to a given treatment regimen within each Generation × Rechallenge stratum. 
+The code below reproduces **Figure 4** from **Section 5** of the paper.
+
+```{r, fig.width=12, fig.height=5, out.width="100%", message=FALSE}
+plot_coeff_cumulative(draws_mcmc)
+```
+
+As detailed in the paper, non-rechallenged worms across all subgroups show no meaningful damage increase over the baseline, with posterior mass overwhelmingly concentrated at zero.
+This is consistent with early developmental rotenone exposure alone being insufficient to induce detectable neurodegeneration at the level considered. 
+Notably, this holds regardless of early dose level and regardless of generation, suggesting that parental developmental exposure does not by itself alter the offspring damage profile.
+
+More informative patterns emerge in the rechallenged subgroups. At the high early dose, both parents and offspring show a pronounced response to rechallenge, with broadly comparable posterior distributions -- though with a slight upward shift in offspring relative to parents -- indicating that severe early parental exposure predisposes both generations to substantial neurodegeneration upon rechallenge, with only modest additional sensitization effect in the $F1$ generation.
+The most striking contrast, however, appears under parental early low exposure.
+While rechallenged parents show only a modest response, rechallenged offspring display a substantially more severe damage profile. 
+This asymmetry suggests that even mild parental developmental exposure -- too subtle to induce sizeable neurodegeneration in parents themselves -- is sufficient to sensitize offspring neurons, substantially amplifying the neuronal damage elicited by the same later-life exposure level.
+
+## Incremental effects
+
+The incremental effects captures additional damage increase at each dose level relative to the one below it. 
+For each Generation × Rechallenge stratum, the cumulative effect at the high dose is the sum of incremental effects at low and high doses.
+The code below reproduces **Figure E.2** from **Appendix E**, complementing the information from the figure above.
+
+```{r, fig.width=12, fig.height=5, out.width="100%", message=FALSE}
+plot_coeff_incremental(draws_mcmc)
+```
+
+The first row coincides with the first row of **Figure 4** above.
+The second row of **Figure 4** above aggregates both rows from here into a single cumulative effect.
+
+## Replicates & ICC
+
+The batch effects allows us to control for experimental variability between experimental groups, thus isolating the effects of rotenone on neuronal damage more clearly.
+The intra-class correlation coefficient (ICC) measures the proportion of the total variance in the model that is made up of the within-group variance.
+The code below reproduces **Figure 5** from **Section 5**.
+
+```{r, fig.width=12, fig.height=5, out.width="100%", message=FALSE}
+plot_replicates_ICC(draws_mcmc)
+```
+
+The first replicate shows a shift toward higher damage scores.
+This is reflected in a 95$\%$ credible interval that does not overlap with that of the third replicate, while the evidence against the second replicate is weaker.
+The second and third replicates exhibit more similar batch effects. 
+
+The ICC is concentrated around 0.65, which indicates that almost two-thirds of the variance is explained by the heterogeneity due to the worm effect.
+This is particularly insightful, as it suggests that there is a strong association of damage experienced by neurons located in the same worm, whereas most existing methods don't account for this dependence.
+
+## Latent scores
+
+Under the rank likelihood framework, latent continuous scores are inferred for each neuron such that their ordering is consistent with the observed damage scores, without explicitly modeling the cutpoints separating ordinal categories.
+The code below reproduces the left panel of **Figure 6** from **Section 5**.
+
+```{r, fig.width=6, fig.height=4, out.width="50%", message=FALSE}
+plot_latent_scores(draws_mcmc)
+```
+
+Here we can clearly appreciate the power of the rank likelihood approach for inference.
+Even though we do not explicitly model the cutpoints in our model, samples respect the constraints that each latent variable will not intersect with the samples from a different damage score than its own -- strictly within each sampling iteration, with boundaries that may appear slightly blurred when averaging across iterations.
+
+## Random effects
+
+The random effects are meant to capture heterogeneity due to the worm effects.
+The code below reproduces the right panel of **Figure 6** from **Section 5** of the main manuscript.
+
+```{r, fig.width=6, fig.height=4, out.width="50%", message=FALSE}
+plot_random_effects(draws_mcmc)
+```
+
+The distribution of the posterior medians of the worm-specific random effects is highly asymmetric, with roughly three components.
+A dominant mode at low latent scores, a smaller secondary mode at intermediate latent scores, and a long right tail at higher latent scores.
+To provide further insight into these subgroups, we juxtapose the thresholds separating latent scores associated with different observed damage scores, implicitly inferred by the rank likelihood.
+These are estimated as the posterior means of the corresponding category boundaries.
+The first peak suggests that many worms are robust to damage, as even the largest among the estimated cumulative treatment effect would not be sufficient to shift the average latent scores of these worms into the damage-1 region.
+The second mode corresponds to intermediate worms, still typically showing no damage but close enough to the boundary that high exposure could push them into higher observed categories.
+The right tail suggests that there are a few worms that are particularly susceptible, and so they experience a strong effect on the margin (i.e., they get damaged a lot more than the other worms).
+
+## Predictions (BAYES-RANK)
+
+In-sample predictions are obtained by mapping posterior predictive draws of the latent score to observed damage categories via estimated cutpoints.
+The code below reproduces the left panel of **Figure E.1** from **Appendix E**.
+
+```{r, fig.width=4.2, fig.height=4, out.width="50%", message=FALSE}
+plot_predictions(data_bayes$y, y_pred$y_median, dir=output_folder)
+```
+
+## Predictions (TREND-CUM-LOGIT)
+
+The same goes for the cumulative logit model alternative considered here.
+The code below reproduces the left panel of **Figure E.2** from **Appendix E** of the main manuscript.
+
+```{r, fig.width=4.2, fig.height=4, out.width="50%", message=FALSE}
+plot_predictions(data_bayes$y, y_pred_clmm, method='TREND-CUM-LOGIT', colors='rocket',
+                 filename='confusion_matrix_clmm', dir=output_folder)
+```
+
+The two confusion matrices are in close agreement, confirming the goodness-of-fit of our procedure.
+
+# References
+
+Bergemann, C.M. et al. (2026). "Progeny effects of rotenone exposure depend on
+parental toxicity." *Toxicological Sciences*, 209(3):kfag011.
+<https://academic.oup.com/toxsci/article/209/3/kfag011/8475413>
+
+Bijwadia, S.R., Morton, K., and Meyer, J.N. (2021). "Quantifying Levels of
+Dopaminergic Neuron Morphological Alteration and Degeneration in
+*Caenorhabditis elegans*." *JoVE*, 177:e62894.
+<https://www.jove.com/t/62894/quantifying-levels-dopaminergic-neuron-morphological-alteration>
+
+Hoff, P.D. (2026). `mtlm`: Multivariate transformed linear models.
+<https://github.com/pdhoff/mtlm>
+
+Presman, R., Anceschi, N., Huayta, J., Meyer, J.N., and Herring, A.H. (2026+).
+"Order-Restricted Bayesian Ordinal Regression for the Modeling of Neuron
+Degeneration in *Caenorhabditis elegans*." Forthcoming.
+<https://arxiv.org/abs/PLACEHOLDER>
+
+
+
+
+
