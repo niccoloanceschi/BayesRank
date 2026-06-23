@@ -346,7 +346,7 @@ set_hyperparameters <- function(hyper_params = NULL) {
 #' @references
 #' [Presman, Anceschi, Huayta, Meyer, and Herring, (2026+) "Order-Restricted
 #' Bayesian Ordinal Regression for the Modeling of Neuron Degeneration in
-#' Caenorhabditis elegans"](https://arxiv.org/abs/PLACEHOLDER)
+#' Caenorhabditis elegans"](https://arxiv.org/pdf/2606.23358)
 #' 
 #' @export
 #' 

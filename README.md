@@ -3,7 +3,7 @@
 **Bayesian rank-based isotonic regression for the analysis of Caenorhabditis elegans toxicological assays**
 
 `BayesRank` is an `R` package implementing the analysis from
-[Presman, Anceschi, Huayta, Meyer, and Herring, (2026+) "*Order-Restricted Bayesian Ordinal Regression for the Modeling of Neuron Degeneration in Caenorhabditis elegans*"](https://arxiv.org/abs/PLACEHOLDER),
+[Presman, Anceschi, Huayta, Meyer, and Herring, (2026+) "*Order-Restricted Bayesian Ordinal Regression for the Modeling of Neuron Degeneration in Caenorhabditis elegans*"](https://arxiv.org/pdf/2606.23358),
 and allowing to reproduce the main results from the manuscript.
 
 It fits a Bayesian rank-based model for ordinal regression under monotonicity constraints, extendsing existing rank-likelihood software to support random effects, parameter constraints, collapsed sampling, and parameter expansion.
@@ -72,4 +72,4 @@ y_pred <- predict_BayesRank(data_bayes$X, data_bayes$W, data_bayes$Q, draws_mcmc
 
 ## Reference
 
-[Presman, Anceschi, Huayta, Meyer, and Herring, (2026+) "*Order-Restricted Bayesian Ordinal Regression for the Modeling of Neuron Degeneration in Caenorhabditis elegans*"](https://arxiv.org/abs/PLACEHOLDER)
+[Presman, Anceschi, Huayta, Meyer, and Herring, (2026+) "*Order-Restricted Bayesian Ordinal Regression for the Modeling of Neuron Degeneration in Caenorhabditis elegans*"](https://arxiv.org/pdf/2606.23358)

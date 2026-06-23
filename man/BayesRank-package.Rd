@@ -10,7 +10,7 @@ Implements a Bayesian isotonic rank-likelihood model for ordinal regression
 under monotonicity constraints, developed to analyze Caenorhabditis elegans neuron
 damage scores from a developmental rotenone exposure assay from
 \href{https://academic.oup.com/toxsci/article/209/3/kfag011/8475413}{Bergemann et al. (2026) "\emph{Progeny effects of rotenone exposure depend on parental toxicity}"}.
-The package reproduces the analysis from \href{https://arxiv.org/abs/PLACEHOLDER}{Presman, Anceschi, Huayta, Meyer, and Herring, (2026+) "\emph{Order-Restricted Bayesian Ordinal Regression for the Modeling of Neuron Degeneration in Caenorhabditis elegans}"}.
+The package reproduces the analysis from \href{https://arxiv.org/pdf/2606.23358}{Presman, Anceschi, Huayta, Meyer, and Herring, (2026+) "\emph{Order-Restricted Bayesian Ordinal Regression for the Modeling of Neuron Degeneration in Caenorhabditis elegans}"}.
 }
 \details{
 Relative to existing rank-likelihood implementations, it additionally supports

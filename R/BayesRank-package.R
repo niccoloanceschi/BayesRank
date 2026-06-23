@@ -8,7 +8,7 @@
 #' The package reproduces the analysis from [Presman, Anceschi, Huayta,
 #' Meyer, and Herring, (2026+) "\emph{Order-Restricted Bayesian Ordinal Regression for
 #' the Modeling of Neuron Degeneration in Caenorhabditis
-#' elegans}"](https://arxiv.org/abs/PLACEHOLDER).
+#' elegans}"](https://arxiv.org/pdf/2606.23358).
 #'
 #' Relative to existing rank-likelihood implementations, it additionally supports
 #' random effects, parameter constraints, collapsed sampling, and parameter expansion.

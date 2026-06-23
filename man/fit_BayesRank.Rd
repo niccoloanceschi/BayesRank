@@ -59,5 +59,5 @@ Optional analytic marginalization of random effects (after burn-in) and
 parameter expansion for selected updates are available for improved mixing.
 }
 \references{
-\href{https://arxiv.org/abs/PLACEHOLDER}{Presman, Anceschi, Huayta, Meyer, and Herring, (2026+) "Order-Restricted Bayesian Ordinal Regression for the Modeling of Neuron Degeneration in Caenorhabditis elegans"}
+\href{https://arxiv.org/pdf/2606.23358}{Presman, Anceschi, Huayta, Meyer, and Herring, (2026+) "Order-Restricted Bayesian Ordinal Regression for the Modeling of Neuron Degeneration in Caenorhabditis elegans"}
 }
